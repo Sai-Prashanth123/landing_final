@@ -6,12 +6,18 @@ import Image from "next/image";
 const CustomButton = ({ children, href, className, iconSrc, width, height }) => {
   const [hovered, setHovered] = useState(false);
 
+  const handleClick = (e) => {
+    e.preventDefault();
+    window.location.href = "https://yellow-field-04c8fdc10.6.azurestaticapps.net";
+  };
+
   return (
     <motion.button
       className={`${className} relative flex items-center justify-center`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       whileHover={{ scale: 1.05 }}
+      onClick={handleClick}
     >
       {/* Hover Icon (Optional) */}
       {hovered && iconSrc && (
@@ -24,7 +30,7 @@ const CustomButton = ({ children, href, className, iconSrc, width, height }) => 
         />
       )}
 
-      <Link href={href} className="z-10">
+      <Link href={href} className="z-10" onClick={handleClick}>
         {children}
       </Link>
 

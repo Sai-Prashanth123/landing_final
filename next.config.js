@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['Jobspring.org']
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'jobspring.org',
+        port: '',
+        pathname: '/**',
+      },
+    ],
   },
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during build
