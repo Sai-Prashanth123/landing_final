@@ -5,20 +5,30 @@ const { execSync } = require('child_process');
 // Output directory
 const outDir = path.join(__dirname, 'out');
 
+// Check if 'out' directory exists
+if (!fs.existsSync(outDir)) {
+  console.error('Error: Output directory "out" does not exist. The export process may have failed.');
+  process.exit(1);
+}
+
 // Function to remove files recursively by pattern
 function removeFiles(directory, pattern) {
-  const files = fs.readdirSync(directory);
-  
-  for (const file of files) {
-    const filePath = path.join(directory, file);
-    const stat = fs.statSync(filePath);
+  try {
+    const files = fs.readdirSync(directory);
     
-    if (stat.isDirectory()) {
-      removeFiles(filePath, pattern);
-    } else if (pattern.test(file)) {
-      console.log(`Removing: ${filePath}`);
-      fs.unlinkSync(filePath);
+    for (const file of files) {
+      const filePath = path.join(directory, file);
+      const stat = fs.statSync(filePath);
+      
+      if (stat.isDirectory()) {
+        removeFiles(filePath, pattern);
+      } else if (pattern.test(file)) {
+        console.log(`Removing: ${filePath}`);
+        fs.unlinkSync(filePath);
+      }
     }
+  } catch (error) {
+    console.error(`Error processing directory ${directory}:`, error.message);
   }
 }
 

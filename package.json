@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node optimize-build.js",
+    "build": "next build && next export && node optimize-build.js",
     "start": "next start",
     "lint": "next lint",
     "clean": "if exist .next rd /s /q .next && if exist out rd /s /q out",
-    "azure-build": "next build && node optimize-build.js"
+    "export": "next export",
+    "azure-build": "npm run build",
+    "test-build": "node test-build.js"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.4.0",

@@ -9,7 +9,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true, // Needed for static exports on Azure
+    unoptimized: true, // Required for static exports
   },
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during build
@@ -25,7 +25,7 @@ const nextConfig = {
   distDir: '.next',
   // Add trailing slash for better compatibility with static hosting
   trailingSlash: true,
-  // Ensure public assets are correctly copied to the output
+  // Disable powered by header
   poweredByHeader: false
 }
 
