@@ -55,24 +55,29 @@ jobs:
             name: pkg.name,
             version: pkg.version,
             private: true,
-            dependencies: {
-              "next": pkg.dependencies.next,
-              "react": pkg.dependencies.react,
-              "react-dom": pkg.dependencies.react-dom
-            },
-            engines: { node: ">=18.0.0" }
+            dependencies: {}
           };
+          
+          // Add core dependencies if they exist
+          ["next", "react", "react-dom"].forEach(dep => {
+            if (pkg.dependencies[dep]) {
+              minimalPkg.dependencies[dep] = pkg.dependencies[dep];
+            }
+          });
           
           // Include essential UI and data packages only
           ["@radix-ui", "framer-motion", "lucide-react", "clsx", "tailwind-merge", "class-variance-authority"].forEach(pkgName => {
-            Object.keys(pkg.dependencies).forEach(dep => {
+            Object.keys(pkg.dependencies || {}).forEach(dep => {
               if (dep.startsWith(pkgName)) {
                 minimalPkg.dependencies[dep] = pkg.dependencies[dep];
               }
             });
           });
           
+          minimalPkg.engines = { node: ">=18.0.0" };
+          
           fs.writeFileSync(".next/standalone/package.json", JSON.stringify(minimalPkg, null, 2));
+          console.log("Created minimal package.json");
           '
           
           # Clean up original node_modules completely and install only what's strictly needed
