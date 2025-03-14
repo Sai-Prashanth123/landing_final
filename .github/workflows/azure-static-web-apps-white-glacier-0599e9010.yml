@@ -26,115 +26,42 @@ jobs:
           node-version: '20'
           cache: 'npm'
           
-      - name: Install Production Dependencies Only
-        run: |
-          npm ci --omit=dev
-          npm prune --production
-      
+      - name: Install Dependencies
+        run: npm ci
+
       - name: Create .env.local file
         run: |
           echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
           echo "NEXT_SWC_MINIFY=true" >> .env.local
 
       - name: Build Next.js Application
-        run: npm run azure-optimized-build
+        run: npm run build
         
-      - name: Clean up large files
+      - name: Debug Build Output
         run: |
-          echo "Removing unnecessary files to reduce size"
-          # Remove source maps
-          find .next -name "*.map" -type f -delete
-          # Remove large node modules
-          rm -rf node_modules/@next/swc-*
-          rm -rf node_modules/next/dist/compiled/webpack
-          rm -rf node_modules/react/cjs
-          rm -rf node_modules/react-dom/cjs
-          rm -rf node_modules/three/examples
-          rm -rf node_modules/three/build
-          rm -rf node_modules/@react-three
-          # Find and remove files larger than 10MB
-          find node_modules -type f -size +10M -exec rm -f {} \;
-          # Remove extra binaries
-          find node_modules -name "*.exe" -delete
-          find node_modules -name "*.dll" -delete
-          find node_modules -name "*.so" -delete
-          # Remove all test and example directories
-          find node_modules -type d -name test -o -name tests -o -name example -o -name examples -exec rm -rf {} \; 2>/dev/null || true
-          # Remove documentation
-          find node_modules -type d -name doc -o -name docs -exec rm -rf {} \; 2>/dev/null || true
+          ls -la .next
+          echo "Checking if standalone directory exists:"
+          ls -la .next/standalone || echo "Standalone directory not found"
           
-      - name: Setup Minimal Deployment Files
+      - name: Setup Static Files
         run: |
           # Create directories
           mkdir -p .next/standalone/public
           mkdir -p .next/standalone/.next/static
           
-          # Copy server.js and create index.js
+          # Copy files
+          cp -r public/* .next/standalone/public/ || echo "No files to copy from public directory"
+          cp -r .next/static/* .next/standalone/.next/static/ || echo "No static files found"
+          
+          # Copy server.js
           cp .next/standalone/server.js .next/standalone/index.js || echo "server.js not found"
           
-          # Create a minimal server file if needed
-          if [ ! -f .next/standalone/index.js ]; then
-            echo "Creating minimal server file"
-            cat > .next/standalone/index.js << 'EOF'
-            // Minimal server file
-            const { createServer } = require('http');
-            const { parse } = require('url');
-            const next = require('next');
-            
-            const dev = process.env.NODE_ENV !== 'production';
-            const hostname = process.env.HOST || '0.0.0.0';
-            const port = process.env.PORT || 3000;
-            
-            const app = next({ dev, dir: __dirname });
-            const handle = app.getRequestHandler();
-            
-            app.prepare().then(() => {
-              createServer((req, res) => {
-                const parsedUrl = parse(req.url, true);
-                handle(req, res, parsedUrl);
-              }).listen(port, hostname, (err) => {
-                if (err) throw err;
-                console.log(`> Ready on http://${hostname}:${port}`);
-              });
-            });
-            EOF
-          fi
+          # Remove cache to reduce size
+          rm -rf .next/cache || echo "No cache directory found"
           
-          # Copy selected public assets (only what's actually needed)
-          mkdir -p .next/standalone/public/images
-          cp -r public/*.ico public/*.json .next/standalone/public/ || true
-          find public -name "*.svg" -size -100k -exec cp {} .next/standalone/public/ \; || true
-          find public -name "*.png" -size -500k -exec cp {} .next/standalone/public/ \; || true
-          
-          # Only copy necessary static files
-          mkdir -p .next/standalone/.next/static/chunks
-          mkdir -p .next/standalone/.next/static/css
-          cp -r .next/static/chunks/*.js .next/standalone/.next/static/chunks/ || true
-          cp -r .next/static/css/*.css .next/standalone/.next/static/css/ || true
-          
-          # Create package.json for Azure
-          cat > .next/standalone/package.json << 'EOF'
-          {
-            "name": "website-deployment",
-            "version": "1.0.0",
-            "private": true,
-            "scripts": {
-              "start": "node index.js"
-            },
-            "engines": {
-              "node": ">=20.0.0"
-            }
-          }
-          EOF
-          
-          # Remove any remaining large files
-          find .next/standalone -type f -size +5M -exec rm -f {} \;
-          
-          # Report final package size
-          echo "Final deployment package size:"
-          du -sh .next/standalone
-          echo "Largest files in package:"
-          find .next/standalone -type f -exec du -h {} \; | sort -hr | head -n 10
+          # Show directory structure
+          echo "Deployment directory structure:"
+          find .next/standalone -type d | sort
 
       - name: Build And Deploy
         id: builddeploy
@@ -147,8 +74,6 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
-          production_branch: "main"
-          deployment_environment: "production"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
