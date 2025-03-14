@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clean": "if exist .next rd /s /q .next"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.4.0",

@@ -19,7 +19,9 @@ const nextConfig = {
   // Add output configuration for production
   output: 'standalone',
   // Disable production source maps to reduce bundle size
-  productionBrowserSourceMaps: false
+  productionBrowserSourceMaps: false,
+  // Default build output directory
+  distDir: '.next'
 }
 
 module.exports = nextConfig 
