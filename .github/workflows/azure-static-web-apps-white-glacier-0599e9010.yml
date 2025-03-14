@@ -42,8 +42,12 @@ jobs:
       
       - name: Build Next.js Application
         run: |
-          set -o pipefail
-          npm run build | tee build.log
+          npm run build
+          # Ensure static files are correctly copied for standalone mode
+          mkdir -p .next/standalone/public
+          cp -r public/* .next/standalone/public/
+          mkdir -p .next/standalone/.next/static
+          cp -r .next/static/* .next/standalone/.next/static/
       
       - name: Debug Build Output
         run: |
