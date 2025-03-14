@@ -30,7 +30,7 @@ jobs:
       - name: Reinstall Dependencies (Production Only)
         run: |
           rm -rf node_modules package-lock.json
-          npm ci --omit=dev
+          npm install --only=production
 
       - name: Create .env.local file
         run: |
