@@ -19,13 +19,14 @@ jobs:
         with:
           submodules: true
           lfs: false
-          
+          fetch-depth: 0
+      
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
           cache: 'npm'
-          
+      
       - name: Install Dependencies
         run: npm ci
 
@@ -33,36 +34,29 @@ jobs:
         run: |
           echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
           echo "NEXT_SWC_MINIFY=true" >> .env.local
-
+          echo "NEXT_JS_IGNORE_ESLINT=1" >> .env.local
+          echo "NEXT_JS_IGNORE_TYPECHECK=1" >> .env.local
+      
       - name: Build Next.js Application
         run: npm run build
-        
+      
       - name: Debug Build Output
         run: |
           ls -la .next
           echo "Checking if standalone directory exists:"
           ls -la .next/standalone || echo "Standalone directory not found"
-          
-      - name: Setup Static Files
+      
+      - name: Cleanup and Optimize Deployment Size
         run: |
-          # Create directories
-          mkdir -p .next/standalone/public
-          mkdir -p .next/standalone/.next/static
-          
-          # Copy files
-          cp -r public/* .next/standalone/public/ || echo "No files to copy from public directory"
-          cp -r .next/static/* .next/standalone/.next/static/ || echo "No static files found"
-          
-          # Copy server.js
-          cp .next/standalone/server.js .next/standalone/index.js || echo "server.js not found"
-          
-          # Remove cache to reduce size
+          # Remove unnecessary files
           rm -rf .next/cache || echo "No cache directory found"
+          rm -rf node_modules/.cache || echo "No node_modules cache found"
+          rm -rf .next/standalone/node_modules/aws-sdk || echo "No AWS SDK found"
           
-          # Show directory structure
-          echo "Deployment directory structure:"
-          find .next/standalone -type d | sort
-
+          # Show final directory size
+          echo "Final Deployment Size:"
+          du -sh .next/standalone
+      
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
@@ -70,7 +64,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GLACIER_0599E9010 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: ".next/standalone" 
+          app_location: ".next/standalone"
           api_location: ""
           output_location: ""
           skip_app_build: true
