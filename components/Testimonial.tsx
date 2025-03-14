@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
-import InfiniteCarousel from "@/components/InfiniteCorousel";
+import InfiniteCarousel from "@/components/InfiniteCarousel";
 
 export default function MasonryCarousel() {
   // Detect mobile screens (adjust the breakpoint as needed)
