@@ -9,7 +9,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    unoptimized: true, // Required for static exports
+    unoptimized: true, // Needed for static exports on Azure
   },
   eslint: {
     ignoreDuringBuilds: true, // Disables ESLint during build
@@ -17,15 +17,15 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Disables type checking during build
   },
-  // Set output to export for static site generation
-  output: 'export',
+  // Set output to standalone for Azure Static Web Apps
+  output: 'standalone',
   // Disable production source maps to reduce bundle size
   productionBrowserSourceMaps: false,
   // Default build output directory
   distDir: '.next',
   // Add trailing slash for better compatibility with static hosting
   trailingSlash: true,
-  // Disable powered by header
+  // Ensure public assets are correctly copied to the output
   poweredByHeader: false
 }
 

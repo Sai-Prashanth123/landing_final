@@ -27,66 +27,30 @@ jobs:
           cache: 'npm'
           
       - name: Install Dependencies
-        run: |
-          npm ci
-          npm install -D terser
+        run: npm ci
         
       - name: Create .env.local file
         run: |
           echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
           echo "NEXT_SWC_MINIFY=true" >> .env.local
 
-      - name: Debug Environment
-        run: |
-          node --version
-          npm --version
-          npx terser --version || echo "Terser not found"
-          ls -la
+      - name: Build Application for Azure
+        run: npm run azure-build
 
-      - name: Run Test Build
-        run: npm run test-build
-        
-      - name: Optimize Build
-        if: success()
-        run: node optimize-build.js
-
-      - name: Verify Output Directory
+      - name: Prepare Deployment Files
         run: |
-          if [ -d "out" ]; then
-            echo "Output directory exists and contains:"
-            ls -la out
-            echo "Total size:"
-            du -sh out
-          else
-            echo "Output directory 'out' does not exist!"
-            echo "Content of current directory:"
-            ls -la
-            exit 1
-          fi
-
-      - name: Prune Large Files
-        if: success()
-        run: |
-          # Remove development files
-          find out -name "*.development.js" -type f -delete || true
-          find out -name "*.LICENSE.txt" -type f -delete || true
-          find out -name "*.map" -type f -delete || true
-          
-          # Report final size
-          echo "Final build size:"
-          du -sh out
-          echo "Largest files:"
-          find out -type f -exec du -h {} \; | sort -rh | head -n 10
+          mkdir -p .next/standalone/public
+          cp -r public/* .next/standalone/public/ || true
+          cp -r .next/static .next/standalone/.next/ || true
 
       - name: Build And Deploy
         id: builddeploy
-        if: success()
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GLACIER_0599E9010 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "out" 
+          app_location: ".next/standalone" 
           api_location: ""
           output_location: ""
           skip_app_build: true
