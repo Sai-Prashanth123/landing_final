@@ -55,17 +55,46 @@ jobs:
           echo "Checking if standalone directory exists:"
           ls -la .next/standalone || echo "Standalone directory not found"
       
-      - name: Cleanup Extra Files
+      - name: Optimize Deployment Size
         run: |
+          # Remove build cache and unnecessary files
           rm -rf .next/cache
           rm -rf node_modules/.cache
-          rm -rf .next/standalone/node_modules/aws-sdk
-          rm -rf .next/standalone/node_modules/typescript
-          rm -rf .next/standalone/node_modules/eslint
+          
+          # Clean node_modules in standalone to reduce size
+          cd .next/standalone
+          
+          # Remove development dependencies and large packages
+          find node_modules -type d -name "typescript" -exec rm -rf {} +
+          find node_modules -type d -name "eslint*" -exec rm -rf {} +
+          find node_modules -type d -name "@typescript-eslint*" -exec rm -rf {} +
+          find node_modules -type d -name "aws-sdk" -exec rm -rf {} +
+          find node_modules -type d -name "*-darwin-*" -exec rm -rf {} +
+          find node_modules -type d -name "*-win32-*" -exec rm -rf {} +
+          find node_modules -type d -name "*-linux-*" -not -path "*$(uname -m)*" -exec rm -rf {} +
+          
+          # Remove test directories and files
+          find node_modules -type d -name "test" -exec rm -rf {} +
+          find node_modules -type d -name "tests" -exec rm -rf {} +
+          find node_modules -type d -name "__tests__" -exec rm -rf {} +
+          find node_modules -type d -name ".git" -exec rm -rf {} +
+          
+          # Remove documentation
+          find node_modules -type d -name "docs" -exec rm -rf {} +
+          find node_modules -type d -name "doc" -exec rm -rf {} +
+          find node_modules -type d -name "example" -exec rm -rf {} +
+          find node_modules -type d -name "examples" -exec rm -rf {} +
+          
+          # Remove source maps
+          find . -name "*.map" -delete
+          
+          # Go back to workspace root
+          cd ../..
           
           # Show final directory size
           echo "Final Deployment Size:"
           du -sh .next/standalone
+          du -sh .next/standalone/node_modules
       
       - name: Build And Deploy
         id: builddeploy
