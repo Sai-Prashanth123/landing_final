@@ -41,59 +41,112 @@ jobs:
           # Build the application
           npm run build
           
-          # Prepare standalone build with minimal dependencies
+          # Create a simplified server.js file for Azure
+          cat > .next/standalone/server.js << 'EOL'
+          const { createServer } = require('http');
+          const { parse } = require('url');
+          const next = require('next');
+          
+          const dev = false;
+          const hostname = '0.0.0.0';
+          const port = process.env.PORT || 3000;
+          
+          const app = next({ dev, dir: __dirname });
+          const handle = app.getRequestHandler();
+          
+          app.prepare().then(() => {
+            createServer(async (req, res) => {
+              try {
+                const parsedUrl = parse(req.url, true);
+                await handle(req, res, parsedUrl);
+              } catch (err) {
+                console.error('Error occurred handling', req.url, err);
+                res.statusCode = 500;
+                res.end('Internal Server Error');
+              }
+            }).listen(port, hostname, (err) => {
+              if (err) throw err;
+              console.log(`Ready on http://${hostname}:${port}`);
+            });
+          });
+          EOL
+          
+          # Create a basic package.json with scripts
+          cat > .next/standalone/package.json << 'EOL'
+          {
+            "name": "website",
+            "version": "0.1.0",
+            "private": true,
+            "scripts": {
+              "start": "node server.js"
+            },
+            "dependencies": {
+              "next": "15.1.5",
+              "react": "19.0.0",
+              "react-dom": "19.0.0"
+            },
+            "engines": {
+              "node": ">=18.0.0"
+            }
+          }
+          EOL
+          
+          # Create a web.config file for Azure to properly handle Next.js routing
+          cat > .next/standalone/web.config << 'EOL'
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <system.webServer>
+              <webSocket enabled="false" />
+              <handlers>
+                <add name="iisnode" path="server.js" verb="*" modules="iisnode"/>
+              </handlers>
+              <rewrite>
+                <rules>
+                  <rule name="NodeInspector" patternSyntax="ECMAScript" stopProcessing="true">
+                    <match url="^server.js\/debug[\/]?" />
+                  </rule>
+                  <rule name="StaticContent">
+                    <action type="Rewrite" url="public{REQUEST_URI}"/>
+                  </rule>
+                  <rule name="DynamicContent">
+                    <conditions>
+                      <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="True"/>
+                    </conditions>
+                    <action type="Rewrite" url="server.js"/>
+                  </rule>
+                </rules>
+              </rewrite>
+              <security>
+                <requestFiltering removeServerHeader="true" />
+              </security>
+              <httpProtocol>
+                <customHeaders>
+                  <remove name="X-Powered-By"/>
+                </customHeaders>
+              </httpProtocol>
+              <httpErrors existingResponse="PassThrough" />
+              <iisnode watchedFiles="web.config;*.js"/>
+            </system.webServer>
+          </configuration>
+          EOL
+          
+          # Ensure static files are correctly copied
           mkdir -p .next/standalone/public
           cp -r public/* .next/standalone/public/ || true
           mkdir -p .next/standalone/.next/static
           cp -r .next/static/* .next/standalone/.next/static/ || true
           
-          # Generate a production-only package.json with minimal dependencies
-          node -e '
-          const fs = require("fs");
-          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
-          const minimalPkg = {
-            name: pkg.name,
-            version: pkg.version,
-            private: true,
-            dependencies: {}
-          };
-          
-          // Add core dependencies if they exist
-          ["next", "react", "react-dom"].forEach(dep => {
-            if (pkg.dependencies[dep]) {
-              minimalPkg.dependencies[dep] = pkg.dependencies[dep];
-            }
-          });
-          
-          // Include essential UI and data packages only
-          ["@radix-ui", "framer-motion", "lucide-react", "clsx", "tailwind-merge", "class-variance-authority"].forEach(pkgName => {
-            Object.keys(pkg.dependencies || {}).forEach(dep => {
-              if (dep.startsWith(pkgName)) {
-                minimalPkg.dependencies[dep] = pkg.dependencies[dep];
-              }
-            });
-          });
-          
-          minimalPkg.engines = { node: ">=18.0.0" };
-          
-          fs.writeFileSync(".next/standalone/package.json", JSON.stringify(minimalPkg, null, 2));
-          console.log("Created minimal package.json");
-          '
-          
-          # Clean up original node_modules completely and install only what's strictly needed
+          # Install only minimal required dependencies
           cd .next/standalone
-          rm -rf node_modules
-          npm install --omit=dev --no-optional --no-audit --progress=false
+          npm install --production --no-audit --progress=false
           
-          # Remove unnecessary files
+          # Remove unnecessary files to reduce size
           find node_modules -type d -name ".git" -exec rm -rf {} + 2>/dev/null || true
           find node_modules -type f -name "*.md" -delete || true
-          find node_modules -type f -name "*.ts" -not -name "*.d.ts" -delete || true
-          find node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
-          find node_modules -type d -name "examples" -exec rm -rf {} + 2>/dev/null || true
           find node_modules -type d -name "test" -exec rm -rf {} + 2>/dev/null || true
           find node_modules -type d -name "tests" -exec rm -rf {} + 2>/dev/null || true
-          find node_modules -type f -path "*/bin/*" -not -name "*.js" -delete || true
+          find node_modules -type d -name "examples" -exec rm -rf {} + 2>/dev/null || true
+          find node_modules -type d -name "docs" -exec rm -rf {} + 2>/dev/null || true
           find . -name "*.map" -delete || true
           
           # Back to project root
@@ -115,6 +168,8 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
+          app_build_command: ""
+          is_static_export: false
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
