@@ -16,6 +16,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Disables type checking during build
   },
+  // Add output configuration for production
+  output: 'standalone',
+  // Disable production source maps to reduce bundle size
+  productionBrowserSourceMaps: false
 }
 
 module.exports = nextConfig 
