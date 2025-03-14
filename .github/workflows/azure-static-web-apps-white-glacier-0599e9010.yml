@@ -26,8 +26,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
           
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install Production Dependencies
+        run: npm ci --only=production
+
+      - name: Remove Dev Dependencies
+        run: npm prune --production
         
       - name: Create .env.local file
         run: |
@@ -42,6 +45,8 @@ jobs:
           mkdir -p .next/standalone/public
           cp -r public/* .next/standalone/public/ || true
           cp -r .next/static .next/standalone/.next/ || true
+          rm -rf .next/cache # Remove cache to reduce size
+          find . -type f -size +50M -delete # Remove files over 50MB
 
       - name: Build And Deploy
         id: builddeploy
@@ -54,6 +59,7 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
+
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
