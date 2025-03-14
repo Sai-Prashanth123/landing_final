@@ -26,7 +26,16 @@ const nextConfig = {
   // Add trailing slash for better compatibility with static hosting
   trailingSlash: true,
   // Ensure public assets are correctly copied to the output
-  poweredByHeader: false
+  poweredByHeader: false,
+  // File tracing settings
+  outputFileTracingRoot: process.cwd(),
+  outputFileTracingExcludes: {
+    '*': [
+      'node_modules/@swc/core-linux-x64-gnu',
+      'node_modules/@swc/core-linux-x64-musl',
+      'node_modules/@esbuild/linux-x64',
+    ],
+  }
 }
 
 module.exports = nextConfig 

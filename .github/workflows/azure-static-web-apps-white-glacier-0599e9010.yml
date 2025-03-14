@@ -26,27 +26,42 @@ jobs:
           node-version: '20'
           cache: 'npm'
           
-      - name: Install Production Dependencies
-        run: npm ci --only=production
+      - name: Install Dependencies
+        run: npm ci
 
-      - name: Remove Dev Dependencies
-        run: npm prune --production
-        
       - name: Create .env.local file
         run: |
           echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
           echo "NEXT_SWC_MINIFY=true" >> .env.local
 
-      - name: Build Application for Azure
-        run: npm run azure-build
-
-      - name: Prepare Deployment Files
+      - name: Build Next.js Application
+        run: npm run build
+        
+      - name: Debug Build Output
         run: |
+          ls -la .next
+          echo "Checking if standalone directory exists:"
+          ls -la .next/standalone || echo "Standalone directory not found"
+          
+      - name: Setup Static Files
+        run: |
+          # Create directories
           mkdir -p .next/standalone/public
-          cp -r public/* .next/standalone/public/ || true
-          cp -r .next/static .next/standalone/.next/ || true
-          rm -rf .next/cache # Remove cache to reduce size
-          find . -type f -size +50M -delete # Remove files over 50MB
+          mkdir -p .next/standalone/.next/static
+          
+          # Copy files
+          cp -r public/* .next/standalone/public/ || echo "No files to copy from public directory"
+          cp -r .next/static/* .next/standalone/.next/static/ || echo "No static files found"
+          
+          # Copy server.js
+          cp .next/standalone/server.js .next/standalone/index.js || echo "server.js not found"
+          
+          # Remove cache to reduce size
+          rm -rf .next/cache || echo "No cache directory found"
+          
+          # Show directory structure
+          echo "Deployment directory structure:"
+          find .next/standalone -type d | sort
 
       - name: Build And Deploy
         id: builddeploy
@@ -59,7 +74,6 @@ jobs:
           api_location: ""
           output_location: ""
           skip_app_build: true
-
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

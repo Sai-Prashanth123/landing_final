@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "if exist .next rd /s /q .next",
-    "azure-build": "next build && cp -r public .next/standalone/public"
+    "azure-build": "next build && (if not exist .next\\standalone\\public mkdir .next\\standalone\\public) && xcopy /E /I /Y public .next\\standalone\\public",
+    "deploy-prepare": "npm run azure-build && (if not exist .next\\standalone\\.next\\static mkdir .next\\standalone\\.next\\static) && xcopy /E /I /Y .next\\static .next\\standalone\\.next\\static"
   },
   "dependencies": {
     "@azure/msal-browser": "^4.4.0",
