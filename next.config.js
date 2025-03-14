@@ -17,8 +17,13 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Disables type checking during build
   },
-  // Set output to standalone for Azure Static Web Apps
+  // Set output to export for smaller static builds
+  // Remove this line if your app uses API routes or server components
+  // output: 'export', 
+  
+  // For server-side rendering, use standalone mode
   output: 'standalone',
+  
   // Disable production source maps to reduce bundle size
   productionBrowserSourceMaps: false,
   // Default build output directory
@@ -27,14 +32,36 @@ const nextConfig = {
   trailingSlash: true,
   // Ensure public assets are correctly copied to the output
   poweredByHeader: false,
-  // File tracing settings
+  // File tracing settings to minimize bundle size
   outputFileTracingRoot: process.cwd(),
   outputFileTracingExcludes: {
     '*': [
-      'node_modules/@swc/core-linux-x64-gnu',
-      'node_modules/@swc/core-linux-x64-musl',
-      'node_modules/@esbuild/linux-x64',
+      'node_modules/@swc/core-*/**/*',
+      'node_modules/esbuild/**/*',
+      'node_modules/webpack/**/*',
+      'node_modules/terser/**/*',
+      'node_modules/sharp/**/*',
+      'node_modules/react/cjs/**/*',
+      'node_modules/react-dom/cjs/**/*',
+      'node_modules/scheduler/cjs/**/*',
+      'node_modules/postcss-preset-env/**/*',
+      'node_modules/@babel/**/*',
+      'node_modules/@react-three/**/*',
+      'node_modules/three/**/*',
+      'node_modules/@types/**/*',
+      'node_modules/typescript/**/*',
+      '**/*.map',
+      '**/*.d.ts',
+      '.git/**/*',
+      'node_modules/.cache/**/*',
     ],
+  },
+  // Exclude specific large files from build
+  experimental: {
+    // Exclude specific pages to reduce size if needed
+    // excludeDefaultMomentLocales: true,
+    optimizeCss: true,  // Minimize CSS 
+    optimizeServerReact: true, // Optimize server components
   }
 }
 
