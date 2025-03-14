@@ -222,12 +222,12 @@ function NavBar() {
             </li>
           </ul>
           <div className="flex justify-evenly items-center gap-[14px] mr-[143px] ml-[143px]">
-            <Button
+            {/* <Button
               variant="outline"
               className="w-[99px] h-[44px] rounded-[0.93rem] bg-transparent text-[#1B29CB] border border-[#1B29CB] hover:border-[#1B29CB] hover:text-[#1B29CB] transition-transform duration-200 hover:scale-105"
             >
               <Link href={"/login"}>Signin</Link>
-            </Button>
+            </Button> */}
             {/* <Button
               variant="default"
               className="w-[99px] h-[44px] rounded-[0.93rem] bg-[#1B29CB] text-white hover:bg-[#1b2acbe9] hover:text-white transition-transform duration-200 hover:scale-105"
@@ -236,12 +236,12 @@ function NavBar() {
             </Button> */}
             <CustomButton
   href="/signup"
-  className="w-[99px] h-[44px] rounded-[0.93rem] bg-[#1B29CB] text-white overflow-clip "
+  className="w-[150px] h-[44px] rounded-[0.93rem] bg-[#1B29CB] text-white overflow-clip "
   iconSrc="/but.svg"
   width={20}
   height={20}
 >
-  Signup
+  Get Started
 </CustomButton>
           </div>
         </div>
