@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'AI Resume Builder | Create Professional Resumes | JobSpring',
     description: 'Create ATS-friendly, professional resumes in minutes with JobSprings AI resume builder.',
     type: 'website',
-    url: 'https://jobspring.com/resume-builder',
+    url: 'https://www.jobspring.org/resumeBuilder/',
   }
 }
 

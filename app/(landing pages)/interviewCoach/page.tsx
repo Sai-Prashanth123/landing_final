@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title: 'AI Interview Coach | Practice Interviews with AI | JobSpring',
     description: 'Practice interviews with AI-powered coaching. Get real-time feedback, personalized tips, and improve your interview skills.',
     type: 'website',
-    url: 'https://jobspring.com/interview-coach',
+    url: 'https://www.jobspring.org/interviewCoach/',
   }
 }
 

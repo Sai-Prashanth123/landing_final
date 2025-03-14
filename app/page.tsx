@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     title: "JobSpring | AI-Powered Job Search Tools & Career Resources",
     description: "Transform your job search with JobSprings AI-powered tools.",
     type: "website",
-    url: "https://jobspring.com",
+    url: "https://www.jobspring.org/",
   },
 };
 
