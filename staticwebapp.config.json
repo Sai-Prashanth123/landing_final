@@ -1,10 +1,11 @@
 {
   "navigationFallback": {
-    "rewrite": "/server.js",
+    "rewrite": "/index.html",
     "exclude": [
       "/images/*.{png,jpg,gif,ico,svg}",
       "/fonts/*",
-      "/*.{css,scss,js}"
+      "/*.{css,scss,js}",
+      "/static/*"
     ]
   },
   "routes": [
@@ -19,13 +20,28 @@
       "headers": {
         "cache-control": "public, max-age=31536000, immutable"
       }
+    },
+    {
+      "route": "/static/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
     }
   ],
   "responseOverrides": {
     "404": {
-      "rewrite": "/_error",
+      "rewrite": "/404.html",
       "statusCode": 404
     }
+  },
+  "globalHeaders": {
+    "content-security-policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; img-src 'self' https: data:; font-src 'self' https: data:; connect-src 'self' https:;"
+  },
+  "mimeTypes": {
+    ".json": "application/json",
+    ".css": "text/css",
+    ".js": "text/javascript",
+    ".html": "text/html"
   },
   "platform": {
     "apiRuntime": "node:20"

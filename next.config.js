@@ -17,8 +17,8 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Disables type checking during build
   },
-  // Set output to standalone for Azure Static Web Apps
-  output: 'standalone',
+  // Set output to export for static site generation
+  output: 'export',
   // Disable production source maps to reduce bundle size
   productionBrowserSourceMaps: false,
   // Default build output directory

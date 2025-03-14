@@ -26,22 +26,43 @@ jobs:
           node-version: '20'
           cache: 'npm'
           
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install Production Dependencies
+        run: npm ci --omit=dev --no-optional
+        
+      - name: Install Build Tools
+        run: npm install -g terser
         
       - name: Create .env.local file
         run: |
           echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
           echo "NEXT_SWC_MINIFY=true" >> .env.local
 
-      - name: Build Application for Azure
-        run: npm run azure-build
+      - name: Build Static Site
+        run: npm run build
 
-      - name: Prepare Deployment Files
+      - name: Check Output Size
         run: |
-          mkdir -p .next/standalone/public
-          cp -r public/* .next/standalone/public/ || true
-          cp -r .next/static .next/standalone/.next/ || true
+          echo "Analyzing build output size..."
+          du -sh out
+          find out -type f -name "*.js" | xargs du -ch | sort -rh | head -10
+          find out -type d | xargs du -ch | sort -rh | head -10
+          echo "Total number of files:"
+          find out -type f | wc -l
+          
+      - name: Prune Large Files
+        run: |
+          # Remove any development-only files
+          find out -name "*.development.js" -type f -delete
+          # Additional size reduction if needed
+          find out -name "*.LICENSE.txt" -type f -delete
+          
+      - name: Create optimized archive
+        run: |
+          cd out
+          tar -czf ../optimized-output.tar.gz .
+          cd ..
+          echo "Archive size:"
+          du -sh optimized-output.tar.gz
 
       - name: Build And Deploy
         id: builddeploy
@@ -50,7 +71,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GLACIER_0599E9010 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: ".next/standalone" 
+          app_location: "out" 
           api_location: ""
           output_location: ""
           skip_app_build: true
