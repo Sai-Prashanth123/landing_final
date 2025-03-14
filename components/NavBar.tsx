@@ -321,18 +321,21 @@ function NavBar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Button
+                {/* <Button
                   variant="outline"
                   className="w-[99px] h-[44px] rounded-[0.93rem] text-[#1B29CB] border border-[#1B29CB] hover:border-[#1B29CB] hover:text-[#1B29CB] transition-transform duration-200 hover:scale-105"
                 >
                   <Link href={"/login"}>Signin</Link>
-                </Button>
-                <Button
-                  variant="default"
-                  className="w-[99px] h-[44px] rounded-[0.93rem] bg-[#1B29CB] text-white hover:bg-[#1B29CB] hover:text-white transition-transform duration-200 hover:scale-105"
-                >
-                  <Link href={"/signup"}>Signup</Link>
-                </Button>
+                </Button> */}
+                         <CustomButton
+  href="/signup"
+  className="w-[150px] h-[44px] rounded-[0.93rem] bg-[#1B29CB] text-white overflow-clip relative right-[1.5rem] "
+  iconSrc="/but.svg"
+  width={20}
+  height={20}
+>
+  Get Started
+</CustomButton>
               </motion.div>
             </div>
           </motion.div>
