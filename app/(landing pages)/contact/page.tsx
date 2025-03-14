@@ -1,8 +1,8 @@
 "use client"
-import Footer from "@/components/Footer";
-import NavBar from "@/components/NavBar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Footer from "../../../components/Footer";
+import NavBar from "../../../components/NavBar";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
 import React, { useState, useRef } from "react";
 
 function ContactPage() {

@@ -1,15 +1,15 @@
-import NavBar from "@/components/NavBar";
+import NavBar from "../../../components/NavBar";
 import React, { JSX } from "react";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import Testimonial from "@/components/Testimonial";
-import Last from "@/components/Last";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import Faq from "@/components/Faq";
+import { Card, CardContent } from "../../../components/ui/card";
+import Testimonial from "../../../components/Testimonial";
+import Last from "../../../components/Last";
+import Footer from "../../../components/Footer";
+import { Button } from "../../../components/ui/button";
+import Faq from "../../../components/Faq";
 import type { Metadata } from 'next'
-import MasonryCarousel from "@/components/Testimonial";
-import Buttons from "@/components/Buttons";
+import MasonryCarousel from "../../../components/Testimonial";
+import Buttons from "../../../components/Buttons";
 
 export const metadata: Metadata = {
   title: 'AI Interview Coach | Practice Interviews with AI | JobSpring',
