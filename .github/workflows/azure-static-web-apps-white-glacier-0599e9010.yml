@@ -27,8 +27,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      - name: Install Dependencies (Production Only)
-        run: npm ci --omit=dev
+      - name: Reinstall Dependencies (Production Only)
+        run: |
+          rm -rf node_modules package-lock.json
+          npm ci --omit=dev
 
       - name: Create .env.local file
         run: |
@@ -36,9 +38,12 @@ jobs:
           echo "NEXT_SWC_MINIFY=true" >> .env.local
           echo "NEXT_JS_IGNORE_ESLINT=1" >> .env.local
           echo "NEXT_JS_IGNORE_TYPECHECK=1" >> .env.local
+          echo "NEXT_DEBUG=1" >> .env.local
       
       - name: Build Next.js Application
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build | tee build.log
       
       - name: Debug Build Output
         run: |
