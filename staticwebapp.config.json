@@ -1,0 +1,33 @@
+{
+  "navigationFallback": {
+    "rewrite": "/server.js",
+    "exclude": [
+      "/images/*.{png,jpg,gif,ico,svg}",
+      "/fonts/*",
+      "/*.{css,scss,js}"
+    ]
+  },
+  "routes": [
+    {
+      "route": "/images/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "route": "/_next/static/*",
+      "headers": {
+        "cache-control": "public, max-age=31536000, immutable"
+      }
+    }
+  ],
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/_error",
+      "statusCode": 404
+    }
+  },
+  "platform": {
+    "apiRuntime": "node:20"
+  }
+} 

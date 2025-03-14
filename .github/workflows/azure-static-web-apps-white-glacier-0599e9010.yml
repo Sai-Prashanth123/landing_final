@@ -20,14 +20,28 @@ jobs:
           submodules: true
           lfs: false
           
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
       - name: Install Dependencies
-        run: npm ci --omit=dev  # Ensures only production dependencies
+        run: npm ci
+        
+      - name: Create .env.local file
+        run: |
+          echo "NEXT_TELEMETRY_DISABLED=1" > .env.local
+          echo "NEXT_SWC_MINIFY=true" >> .env.local
 
-      - name: Build Application
-        run: npm run build  # Make sure next.config.js has "output: 'export'"
+      - name: Build Application for Azure
+        run: npm run azure-build
 
-      - name: Remove Cache to Reduce Size
-        run: rm -rf .next/cache  # Reduces deployment size
+      - name: Prepare Deployment Files
+        run: |
+          mkdir -p .next/standalone/public
+          cp -r public/* .next/standalone/public/ || true
+          cp -r .next/static .next/standalone/.next/ || true
 
       - name: Build And Deploy
         id: builddeploy
@@ -36,9 +50,10 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_WHITE_GLACIER_0599E9010 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/" 
-          api_location: "api"
-          output_location: "out"  # Changed from ".next" to "out" for static deployment
+          app_location: ".next/standalone" 
+          api_location: ""
+          output_location: ""
+          skip_app_build: true
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
