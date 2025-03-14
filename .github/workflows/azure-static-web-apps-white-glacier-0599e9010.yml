@@ -27,8 +27,8 @@ jobs:
           node-version: '20'
           cache: 'npm'
       
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install Dependencies (Production Only)
+        run: npm ci --omit=dev
 
       - name: Create .env.local file
         run: |
@@ -46,12 +46,13 @@ jobs:
           echo "Checking if standalone directory exists:"
           ls -la .next/standalone || echo "Standalone directory not found"
       
-      - name: Cleanup and Optimize Deployment Size
+      - name: Cleanup Extra Files
         run: |
-          # Remove unnecessary files
-          rm -rf .next/cache || echo "No cache directory found"
-          rm -rf node_modules/.cache || echo "No node_modules cache found"
-          rm -rf .next/standalone/node_modules/aws-sdk || echo "No AWS SDK found"
+          rm -rf .next/cache
+          rm -rf node_modules/.cache
+          rm -rf .next/standalone/node_modules/aws-sdk
+          rm -rf .next/standalone/node_modules/typescript
+          rm -rf .next/standalone/node_modules/eslint
           
           # Show final directory size
           echo "Final Deployment Size:"
